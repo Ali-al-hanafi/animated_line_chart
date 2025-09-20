@@ -10,7 +10,10 @@ class CustomCurve extends CustomPainter {
   final double curveWidth;
   final Color pointsColor;
   final double pointsWidth;
-  const CustomCurve({
+  final Gradient shadeGradient;
+  final List<String> toolTipTexts;
+  final TextStyle toolTipTextStyle;
+  CustomCurve({
     required this.curveStops,
     required this.backgroundColor,
     required this.axisColor,
@@ -18,10 +21,16 @@ class CustomCurve extends CustomPainter {
     required this.curveWidth,
     required this.pointsColor,
     required this.pointsWidth,
+    required this.shadeGradient,
+    required this.toolTipTexts,
+    required this.toolTipTextStyle,
   });
+
+  late final List<Offset> scaledPoints;
 
   @override
   void paint(Canvas canvas, Size size) {
+    final Size(:width, :height) = size;
     final paintBg = Paint()..color = backgroundColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paintBg);
 
@@ -34,7 +43,22 @@ class CustomCurve extends CustomPainter {
       Offset(size.width, size.height),
       axisPaint,
     );
+
     canvas.drawLine(Offset(0, size.height), Offset(0, 0), axisPaint);
+
+    canvas.drawLine(Offset(0, 0), Offset(-4, 8), axisPaint);
+    canvas.drawLine(Offset(0, 0), Offset(4, 8), axisPaint);
+
+    canvas.drawLine(
+      Offset(width, height),
+      Offset(width - 8, height - 4),
+      axisPaint,
+    );
+    canvas.drawLine(
+      Offset(width, height),
+      Offset(width - 8, height + 4),
+      axisPaint,
+    );
 
     final maxX = curveStops.map((e) => e.dx).reduce(max);
     final maxY = curveStops.map((e) => e.dy).reduce(max);
@@ -71,6 +95,17 @@ class CustomCurve extends CustomPainter {
     }
     canvas.drawPath(path, curvePaint);
 
+    final fillPaint = Paint()
+      ..shader = shadeGradient.createShader(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+      );
+
+    final fillPath = Path.from(path)
+      ..lineTo(scaledPoints.last.dx, size.height)
+      ..lineTo(scaledPoints.first.dx, size.height)
+      ..close();
+    canvas.drawPath(fillPath, fillPaint);
+
     canvas.drawPoints(
       PointMode.points,
       scaledPoints,
@@ -79,6 +114,20 @@ class CustomCurve extends CustomPainter {
         ..strokeWidth = pointsWidth
         ..strokeCap = StrokeCap.round,
     );
+
+    for (int i = 0; i < scaledPoints.length; i++) {
+      final point = scaledPoints[i];
+      final label = toolTipTexts[i];
+
+      final textPainter = TextPainter(
+        text: TextSpan(text: label, style: toolTipTextStyle),
+        textDirection: TextDirection.ltr,
+      )..layout(minWidth: 0, maxWidth: size.width);
+
+      final offset = Offset(point.dx + 5, point.dy - 20);
+      textPainter.paint(canvas, offset);
+      canvas.drawColor(Colors.purple, BlendMode.dstATop);
+    }
   }
 
   @override
@@ -89,6 +138,9 @@ class CustomCurve extends CustomPainter {
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.curveWidth != curveWidth ||
         oldDelegate.pointsColor != pointsColor ||
-        oldDelegate.pointsWidth != pointsWidth;
+        oldDelegate.pointsWidth != pointsWidth ||
+        oldDelegate.shadeGradient != shadeGradient ||
+        oldDelegate.toolTipTexts != toolTipTexts ||
+        oldDelegate.toolTipTextStyle != toolTipTextStyle;
   }
 }

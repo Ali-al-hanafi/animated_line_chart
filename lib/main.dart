@@ -47,6 +47,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final curveStops = [
+      Offset(0.0, 0.0),
+      Offset(1.0, _counter),
+      Offset(2.0, _counter1),
+      Offset(3.0, _counter3),
+      Offset(4.0, _counter2),
+    ];
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -54,13 +61,27 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: CurvedLineGraph(
-          curveStops: [
-            Offset(0.0, 0.0),
-            Offset(1.0, _counter),
-            Offset(2.0, _counter1),
-            Offset(3.0, _counter3),
-            Offset(4.0, _counter2),
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.only(top: 80),
+              child: CurvedLineGraph(
+                horizontalAxisText: "Time",
+                verticalAxisText: "Views",
+                curveStops: curveStops,
+                toolTipTexts: [
+                  "Monday, ${(curveStops.elementAt(0).dy * 10).toInt()}",
+                  "Tuesday, ${(curveStops.elementAt(1).dy * 10).toInt()}",
+                  "Wednesday, ${(curveStops.elementAt(2).dy * 10).toInt()}",
+                  "Thursday, ${(curveStops.elementAt(3).dy * 10).toInt()}",
+                  "Friday, ${(curveStops.elementAt(4).dy * 10).toInt()}",
+                ],
+              ),
+            ),
+            Text(
+              "Post Demographics",
+              style: TextStyle(color: Colors.red, fontSize: 24),
+            ),
           ],
         ),
       ),

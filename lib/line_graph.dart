@@ -19,6 +19,10 @@ class CurvedLineGraph extends StatefulWidget {
   final double fontSize;
   final double pointsWidth;
   final Color pointsColor;
+  final Gradient shadeGradient;
+  final double calibrationLength;
+  final List<String> toolTipTexts;
+  final TextStyle toolTipTextStyle;
   const CurvedLineGraph({
     super.key,
     required this.curveStops,
@@ -26,11 +30,26 @@ class CurvedLineGraph extends StatefulWidget {
     this.width = 250,
     this.fontSize = 18,
     this.pointsWidth = 6,
+    this.calibrationLength = 3,
+    this.shadeGradient = const LinearGradient(
+      colors: [
+        Colors.greenAccent,
+
+        Color.fromARGB(255, 187, 61, 52),
+        Colors.transparent,
+      ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    ),
     this.axesFontColor = Colors.black,
     this.axesFontStyle = FontStyle.normal,
     this.axesFontWeight = FontWeight.w500,
     this.horizontalAxisText = "x-axis",
     this.verticalAxisText = "y-axis",
+    this.toolTipTexts = const ["x,y", "x,y", "x,y", "x,y", "x,y"],
+    this.toolTipTextStyle = const TextStyle(
+      color: Color.fromARGB(255, 11, 97, 88),
+    ),
     this.backgroundColor = Colors.transparent,
     this.axisColor = Colors.red,
     this.pointsColor = Colors.black,
@@ -101,16 +120,20 @@ class __CurvedLineGraphState extends State<CurvedLineGraph>
               builder: (context, child) {
                 final t = _controller.value;
                 final currentStops = lerpOffsetList(oldStops, newStops, t);
+                final painter = CustomCurve(
+                  curveStops: currentStops,
+                  backgroundColor: widget.backgroundColor,
+                  axisColor: widget.axisColor,
+                  curveColor: widget.curveColor,
+                  curveWidth: widget.curveWidth,
+                  pointsColor: widget.pointsColor,
+                  pointsWidth: widget.pointsWidth,
+                  toolTipTexts: widget.toolTipTexts,
+                  toolTipTextStyle: widget.toolTipTextStyle,
+                  shadeGradient: widget.shadeGradient,
+                );
                 return CustomPaint(
-                  painter: CustomCurve(
-                    curveStops: currentStops,
-                    backgroundColor: widget.backgroundColor,
-                    axisColor: widget.axisColor,
-                    curveColor: widget.curveColor,
-                    curveWidth: widget.curveWidth,
-                    pointsColor: widget.pointsColor,
-                    pointsWidth: widget.pointsWidth,
-                  ),
+                  painter: painter,
                   size: Size(widget.width, widget.height),
                 );
               },
